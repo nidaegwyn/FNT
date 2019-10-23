@@ -45,7 +45,7 @@ namespace FNT
                 face = new Face(_lib, fontBytes, 0);
 
                 face.SetCharSize(0, Size, 0, 96);
-                LineHeight = face.Size.Metrics.NominalHeight;
+                LineHeight = (int)face.Size.Metrics.Height;
                 ascender = (int)face.Size.Metrics.Ascender;
 
                 face.LoadGlyph(face.GetCharIndex(32), LoadFlags.Default, LoadTarget.Normal);
