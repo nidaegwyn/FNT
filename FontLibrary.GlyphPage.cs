@@ -36,9 +36,16 @@ namespace FNT
                         var node = nodes[i];
                         nodes.RemoveAt(i);
                         rect = new Rectangle(node.X, node.Y, w, h);
-                        nodes.Add(new Rectangle(rect.Right, rect.Y, node.Right - rect.Right, rect.Height));
-                        nodes.Add(new Rectangle(rect.X, rect.Bottom, rect.Width, node.Bottom - rect.Bottom));
-                        nodes.Add(new Rectangle(rect.Right, rect.Bottom, node.Right - rect.Right, node.Bottom - rect.Bottom));
+
+                        if (node.X == 0)
+                        {
+                            nodes.Insert(i, new Rectangle(rect.Right, rect.Y, node.Right - rect.Right, rect.Height));
+                            nodes.Add(new Rectangle(rect.X, rect.Bottom, node.Right, node.Bottom - rect.Bottom));
+                        }
+                        else
+                        {
+                            nodes.Insert(i, new Rectangle(rect.Right, rect.Y, node.Right - rect.Right, node.Height));
+                        }
 
                         //  pad in for result
                         rect.X += 1;
