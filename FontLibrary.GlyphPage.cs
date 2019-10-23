@@ -16,9 +16,9 @@ namespace FNT
             {
                 TextureSize = textureSize;
                 nodes.Add(new Rectangle(0, 0, textureSize, textureSize));
-                colors = new Color[textureSize * textureSize];
+                colors = new uint[textureSize * textureSize];
                 for (int i = textureSize * textureSize; i-- > 0;)
-                    colors[i] = new Color(255, 255, 255, 0);
+                    colors[i] = 0x00FFFFFF;
 
                 Texture = new Texture2D(graphicsDevice, textureSize, textureSize, false, SurfaceFormat.Color);
             }
@@ -68,7 +68,7 @@ namespace FNT
                     {
                         var src = by * width + bx;
                         var dest = (by + y) * TextureSize + bx + x;
-                        colors[dest] = new Color(255, 255, 255, bitmap[src]);
+                        colors[dest] = (uint)(0x00FFFFFF | (bitmap[src] << 24));
                     }
                 }
 
@@ -81,7 +81,7 @@ namespace FNT
             }
 
             private readonly int TextureSize;
-            private readonly Color[] colors;
+            private readonly uint[] colors;
             private readonly List<Rectangle> nodes = new List<Rectangle>();
         }
 
