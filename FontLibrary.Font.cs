@@ -194,7 +194,15 @@ namespace FNT
                 if (!texturesByChar.TryGetValue(glyph.Character, out var texture))
                 {
                     var page = FindPage(glyph.Width, glyph.Height, out var packX, out var packY);
-                    page.RenderGlyph(glyph.Width, glyph.Height, glyph.BufferData, packX, packY);
+
+                    if (glyph.Bitmap.PixelMode == PixelMode.Mono)
+                    {
+                        page.RenderMonoGlyph(glyph.Bitmap, packX, packY);
+                    }
+                    else
+                    {
+                        page.RenderGrayscaleGlyph(glyph.Bitmap, packX, packY);
+                    }
 
                     boundsByChar[glyph.Character] = bounds = new Rectangle(packX, packY, glyph.Width, glyph.Height);
                     return texturesByChar[glyph.Character] = texture = page.Texture;
@@ -238,19 +246,10 @@ namespace FNT
                 if (glyphIndex == 0)
                     return false;
                 
-                byte[] bufferData;
                 face.LoadGlyph(glyphIndex, LoadFlags.Default, LoadTarget.Normal);
-                if (face.Glyph.Metrics.Width == 0)
-                {
-                    bufferData = new byte[0];
-                }
-                else
-                {
-                    face.Glyph.RenderGlyph(RenderMode.Normal);
-                    bufferData = face.Glyph.Bitmap.BufferData;
-                }
-                    
-                glyphs[c] = glyph = new GlyphInfo(c, glyphIndex, face.Glyph.BitmapLeft, face.Glyph.Metrics, bufferData);
+                face.Glyph.RenderGlyph(RenderMode.Normal);
+
+                glyphs[c] = glyph = new GlyphInfo(c, glyphIndex, face.Glyph.BitmapLeft, face.Glyph.Metrics, face.Glyph.Bitmap);
                 return true;
             }
 

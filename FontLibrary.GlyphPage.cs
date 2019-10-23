@@ -60,15 +60,41 @@ namespace FNT
                 return false;
             }
 
-            public void RenderGlyph(int width, int height, byte[] bitmap, int x, int y)
+            public void RenderGrayscaleGlyph(GlyphBitmap bitmap, int x, int y)
             {
+                int height = bitmap.Rows;
+                int width = bitmap.Width;
+                int pitch = bitmap.Pitch;
+                byte[] bufferData = bitmap.BufferData;
+
                 for (int by = 0; by < height; by++)
                 {
                     for (int bx = 0; bx < width; bx++)
                     {
-                        var src = by * width + bx;
+                        var src = by * pitch + bx;
                         var dest = (by + y) * TextureSize + bx + x;
-                        colors[dest] = (uint)(0x00FFFFFF | (bitmap[src] << 24));
+                        colors[dest] = (uint)(0x00FFFFFF | (bufferData[src] << 24));
+                    }
+                }
+
+                Texture.SetData(colors);
+            }
+
+            public void RenderMonoGlyph(GlyphBitmap bitmap, int x, int y)
+            {
+                int height = bitmap.Rows;
+                int width = bitmap.Width;
+                int pitch = bitmap.Pitch;
+                byte[] bufferData = bitmap.BufferData;
+
+                for (int by = 0; by < height; by++)
+                {
+                    for (int bx = 0; bx < width; bx++)
+                    {
+                        int src = by * pitch + bx / 8;
+                        int dest = (by + y) * TextureSize + bx + x;
+                        bool isOpaque = (bufferData[src] & (1 << (7 - bx % 8))) != 0;
+                        colors[dest] = isOpaque ? 0xFFFFFFFF : 0x00FFFFFF;
                     }
                 }
 
@@ -108,10 +134,10 @@ namespace FNT
             public int BearingX;
             public int BearingY;
             public char Character;
-            public byte[] BufferData;
+            public GlyphBitmap Bitmap;
             public int BitmapLeft;
 
-            public GlyphInfo(char c, uint index, int bitmapLeft, GlyphMetrics metrics, byte[] bufferData)
+            public GlyphInfo(char c, uint index, int bitmapLeft, GlyphMetrics metrics, FTBitmap bitmap)
             {
                 BitmapLeft = bitmapLeft;
                 Index = index;
@@ -121,7 +147,25 @@ namespace FNT
                 Advance = (int)metrics.HorizontalAdvance;
                 BearingX = (int)metrics.HorizontalBearingX;
                 BearingY = (int)metrics.HorizontalBearingY;
-                BufferData = bufferData;
+                Bitmap = new GlyphBitmap(bitmap);
+            }
+        }
+
+        private struct GlyphBitmap
+        {
+            public byte[] BufferData;
+            public int Pitch;
+            public int Rows;
+            public int Width;
+            public PixelMode PixelMode;
+
+            public GlyphBitmap(FTBitmap bitmap)
+            {
+                Pitch = bitmap.Pitch;
+                Rows = bitmap.Rows;
+                Width = bitmap.Width;
+                PixelMode = bitmap.PixelMode;
+                BufferData = Pitch == 0 ? new byte[0] : bitmap.BufferData;
             }
         }
     }
